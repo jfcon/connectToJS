@@ -22,9 +22,6 @@ client.connect(err => {
 
 function listPeople(db) {
   db.query("SELECT * from famous_people", (err, res) => {
-    console.log("Err is: ", err);
-    console.log("res is:", res.rows);
-    console.log("command is: ", command);
     db.end();
   });
 }
@@ -33,7 +30,17 @@ function searchPeople(db, searchTerm) {
   const query = `SELECT * FROM famous_people WHERE first_name LIKE ($1::text);`;
   db.query(query, [searchTerm], (err, res) => {
     if (err) throw err;
-    console.log("res is: ", res.rows);
-    db.end();
+    console.log("Searching...");
+    formatRes(db, searchTerm, res.rows);
   });
+}
+
+function formatRes(db, searchTerm, results) {
+  console.log(`Found ${results.length} person(s) by the name ${searchTerm}`);
+  for (let result in results) {
+    let count = Number(result) + 1;
+    let birthdate = results[result].birthdate;
+    console.log(`- ${count}: ${results[result].first_name} ${results[result].last_name}, born ${birthdate.toString().slice(0, 15)}`);
+  }
+  db.end();
 }
